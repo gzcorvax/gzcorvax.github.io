@@ -1,0 +1,163 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Nexus3.77搭建Maven私有仓库 | 威克斯科技</title><meta name="author" content="考威克斯"><meta name="copyright" content="考威克斯"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Maven 是日常开发过程中，都会接触到的项目管理工具。Maven 可以将开发人员从繁杂的文档管理、项目打包等工作中解放出来，把更多的精力放在业务开发上。Maven 带来的便利这里就不多说了，但是只是单单使用 Maven，有时候也会遇到依赖文件无法下载的情况，原因有很多，有可能是中央仓库的问题，也有可能是网络问题等等；与此同时，有一部分的第三方的类库是没有发布到 Maven 上的，因此并没有 Ma">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nexus3.77搭建Maven私有仓库">
+<meta property="og:url" content="https://gzcorvax.github.io/posts/cbb7d080/index.html">
+<meta property="og:site_name" content="威克斯科技">
+<meta property="og:description" content="Maven 是日常开发过程中，都会接触到的项目管理工具。Maven 可以将开发人员从繁杂的文档管理、项目打包等工作中解放出来，把更多的精力放在业务开发上。Maven 带来的便利这里就不多说了，但是只是单单使用 Maven，有时候也会遇到依赖文件无法下载的情况，原因有很多，有可能是中央仓库的问题，也有可能是网络问题等等；与此同时，有一部分的第三方的类库是没有发布到 Maven 上的，因此并没有 Ma">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gzcorvax.github.io/img/corvax-icon.png">
+<meta property="article:published_time" content="2026-03-29T01:56:51.000Z">
+<meta property="article:modified_time" content="2026-04-12T02:05:21.565Z">
+<meta property="article:author" content="考威克斯">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gzcorvax.github.io/img/corvax-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Nexus3.77搭建Maven私有仓库",
+  "url": "https://gzcorvax.github.io/posts/cbb7d080/",
+  "image": "https://gzcorvax.github.io/img/corvax-icon.png",
+  "datePublished": "2026-03-29T01:56:51.000Z",
+  "dateModified": "2026-04-12T02:05:21.565Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "考威克斯",
+      "url": "https://gzcorvax.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon-32.png"><link rel="canonical" href="https://gzcorvax.github.io/posts/cbb7d080/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Nexus3.77搭建Maven私有仓库',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/corvax-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 新闻</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/%E4%BC%81%E4%B8%9A%E5%8A%A8%E6%80%81/"><i class="fa-fw fas fa-atom"></i><span> 企业</span></a></li><li><a class="site-page child" href="/categories/%E8%A1%8C%E4%B8%9A%E5%8A%A8%E6%80%81/"><i class="fa-fw fas fa-bahai"></i><span> 行业</span></a></li><li><a class="site-page child" href="/categories/%E4%BC%81%E4%B8%9A%E6%94%BF%E7%AD%96/"><i class="fa-fw fas fa-window-restore"></i><span> 政策</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-barcode"></i><span> 产品</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/notebook/"><i class="fa-fw fas fa-mobile-alt"></i><span> 移动</span></a></li><li><a class="site-page child" href="/posts/ce9df5c4/"><i class="fa-fw fas fa-desktop"></i><span> 桌面</span></a></li><li><a class="site-page child" href="/nav/custom/"><i class="fa-fw fas fa-cubes"></i><span> 定制</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-biohazard"></i><span> 案例</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/eclectric/"><i class="fa-fw far fa-compass"></i><span> 电力</span></a></li><li><a class="site-page child" href="/nav/telecom/"><i class="fa-fw fas fa-broadcast-tower"></i><span> 电信</span></a></li><li><a class="site-page child" href="/nav/bank/"><i class="fa-fw fas fa-calculator"></i><span> 银行</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw far fa-grin"></i><span> 服务</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/sale-pre/"><i class="fa-fw far fa-circle"></i><span> 售前</span></a></li><li><a class="site-page child" href="/nav/sale-during/"><i class="fa-fw far fa-clock"></i><span> 售中</span></a></li><li><a class="site-page child" href="/nav/sale-after/"><i class="fa-fw far fa-check-circle"></i><span> 售后</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-user-friends"></i><span> 关于</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/about/"><i class="fa-fw fas fa-archive"></i><span> 简介</span></a></li><li><a class="site-page child" href="/nav/msgboard/"><i class="fa-fw far fa-comments"></i><span> 留言</span></a></li><li><a class="site-page child" href="/nav/contact/"><i class="fa-fw fas fa-camera-retro"></i><span> 联系</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/cover/cover6.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo.png" alt="Logo"><span class="site-name">威克斯科技</span></a><a class="nav-page-title" href="/"><span class="site-name">Nexus3.77搭建Maven私有仓库</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 新闻</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/%E4%BC%81%E4%B8%9A%E5%8A%A8%E6%80%81/"><i class="fa-fw fas fa-atom"></i><span> 企业</span></a></li><li><a class="site-page child" href="/categories/%E8%A1%8C%E4%B8%9A%E5%8A%A8%E6%80%81/"><i class="fa-fw fas fa-bahai"></i><span> 行业</span></a></li><li><a class="site-page child" href="/categories/%E4%BC%81%E4%B8%9A%E6%94%BF%E7%AD%96/"><i class="fa-fw fas fa-window-restore"></i><span> 政策</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-barcode"></i><span> 产品</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/notebook/"><i class="fa-fw fas fa-mobile-alt"></i><span> 移动</span></a></li><li><a class="site-page child" href="/posts/ce9df5c4/"><i class="fa-fw fas fa-desktop"></i><span> 桌面</span></a></li><li><a class="site-page child" href="/nav/custom/"><i class="fa-fw fas fa-cubes"></i><span> 定制</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-biohazard"></i><span> 案例</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/eclectric/"><i class="fa-fw far fa-compass"></i><span> 电力</span></a></li><li><a class="site-page child" href="/nav/telecom/"><i class="fa-fw fas fa-broadcast-tower"></i><span> 电信</span></a></li><li><a class="site-page child" href="/nav/bank/"><i class="fa-fw fas fa-calculator"></i><span> 银行</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw far fa-grin"></i><span> 服务</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/sale-pre/"><i class="fa-fw far fa-circle"></i><span> 售前</span></a></li><li><a class="site-page child" href="/nav/sale-during/"><i class="fa-fw far fa-clock"></i><span> 售中</span></a></li><li><a class="site-page child" href="/nav/sale-after/"><i class="fa-fw far fa-check-circle"></i><span> 售后</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-user-friends"></i><span> 关于</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/nav/about/"><i class="fa-fw fas fa-archive"></i><span> 简介</span></a></li><li><a class="site-page child" href="/nav/msgboard/"><i class="fa-fw far fa-comments"></i><span> 留言</span></a></li><li><a class="site-page child" href="/nav/contact/"><i class="fa-fw fas fa-camera-retro"></i><span> 联系</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Nexus3.77搭建Maven私有仓库</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-29T01:56:51.000Z" title="发表于 2026-03-29 09:56:51">2026-03-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-12T02:05:21.565Z" title="更新于 2026-04-12 10:05:21">2026-04-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%BC%81%E4%B8%9A%E5%8A%A8%E6%80%81/">企业动态</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>Maven 是日常开发过程中，都会接触到的项目管理工具。Maven 可以将开发人员从繁杂的文档管理、项目打包等工作中解放出来，把更多的精力放在业务开发上。<br>Maven 带来的便利这里就不多说了，但是只是单单使用 Maven，有时候也会遇到依赖文件无法下载的情况，原因有很多，有可能是中央仓库的问题，也有可能是网络问题等等；<br>与此同时，有一部分的第三方的类库是没有发布到 Maven 上的，因此并没有 Maven 相关的依赖信息，这就给我们使用 Maven 构建项目带来了一定的麻烦。<br>此时也就自然想要搭建Maven私有仓库了。</p>
+<embed src="/doc/nexus.pdf" type="application/pdf" width="100%" height="800px" /></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://gzcorvax.github.io">考威克斯</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://gzcorvax.github.io/posts/cbb7d080/">https://gzcorvax.github.io/posts/cbb7d080/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://gzcorvax.github.io" target="_blank">威克斯科技</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="/img/corvax-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/6fbc2229/" title="Gitlab18.8搭建私有代码管理仓库"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Gitlab18.8搭建私有代码管理仓库</div></div><div class="info-2"><div class="info-item-1">GitLab 是一个用于仓库管理系统的开源项目，使用Git作为代码管理工具，并在此基础上搭建起来的web服务。安装方法是参考GitLab在GitHub上的Wiki页面。同时官方也提供了免费版本，可以支持独立安装，也可以支持直接使用官方搭建的web服务。 </div></div></div></a><a class="pagination-related" href="/posts/c8b3f990/" title="小微企业做账报税流程及避坑指南"><img class="cover" src="/img/banner/b16.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">小微企业做账报税流程及避坑指南</div></div><div class="info-2"><div class="info-item-1">小微企业做账报税并没有想象中那么复杂，关键在于先掌握规则。2026年新规下，小型微利企业年应纳税所得额300万以内实际税负仅5%，小规模纳税人季度销售额30万以内免征增值税。下面这套”做账三件事、报税三步走”的流程，可以帮你在合规前提下用足国家给的优惠。 一、做账流程：把”糊涂账”变”明白账”做账是报税的基础。账做不对，报税一定出问题。 第一步：每月整理票据（基础中的基础）每月结束后3个工作日内，必须把三类票据整理完毕：    票据类型 包含内容 关键提醒    收入类 开的普票、未开票收入记录 未开票收入也要记账，否则属于偷税   成本类 采购发票、入库单、合同 发票抬头必须是企业全称，杜绝虚开发票   费用类 房租、水电、工资、差旅、办公费等 必须有合法凭证，白条不能入账   ⚠️ 创业者的常见误区：以为自己没开发票就不用做账。实际上，有无收入都要记账，没业务就做”零申报”账，有未开票收入也要如实记录。 第二步：每月填制记账凭证（核心环节）小规模纳税人核算很简单，记住几个核心分录即可：  销售货物（开普票或未开票） text 借：银行存款 贷：主营业务收入（不含税金额） 贷：...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/corvax-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">考威克斯</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://gitee.com/corvax"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">公司官方网站</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/cba235ac/" title="JAVA开发的B/S架构应用打包成Electron应用">JAVA开发的B/S架构应用打包成Electron应用</a><time datetime="2026-07-22T01:02:44.000Z" title="发表于 2026-07-22 09:02:44">2026-07-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/99dec99c/" title="本地部署deepseek-r1模型">本地部署deepseek-r1模型</a><time datetime="2026-05-07T03:24:19.000Z" title="发表于 2026-05-07 11:24:19">2026-05-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/ce9df5c4/" title="综合信息管理系统"><img src="/img/cover/cover2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="综合信息管理系统"/></a><div class="content"><a class="title" href="/posts/ce9df5c4/" title="综合信息管理系统">综合信息管理系统</a><time datetime="2026-03-29T12:54:29.000Z" title="发表于 2026-03-29 20:54:29">2026-03-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/comate/" title="IDEA安装TRAE插件进行AI编程">IDEA安装TRAE插件进行AI编程</a><time datetime="2026-03-29T12:19:16.000Z" title="发表于 2026-03-29 20:19:16">2026-03-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/rank/" title="AI编程工具综合排行">AI编程工具综合排行</a><time datetime="2026-03-29T12:02:25.000Z" title="发表于 2026-03-29 20:02:25">2026-03-29</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(/img/footer/p5.jpg);"><div class="footer-flex"><div class="footer-flex-items"><div class="footer-flex-item"><div class="footer-flex-title">新手指南</div><div class="footer-flex-content"><a href="/nav/copyright/" target="_blank" title="版权声明">版权声明</a><div>会员注册</div></div></div></div><div class="footer-flex-items"><div class="footer-flex-item"><div class="footer-flex-title">订单交易</div><div class="footer-flex-content"><div>服务协议</div><div>帮助中心</div></div></div></div><div class="footer-flex-items"><div class="footer-flex-item"><div class="footer-flex-title">配送售后</div><div class="footer-flex-content"><div>互动合作</div><div>商务合作</div></div></div></div><div class="footer-flex-items"><div class="footer-flex-item"><div class="footer-flex-title">网站功能</div><div class="footer-flex-content"><div>友情链接</div><div>战略合作</div></div></div></div><div class="footer-flex-items"><div class="footer-flex-item"><div class="footer-flex-title">礼品兑换</div><div class="footer-flex-content"><div>常见问题</div><a href="/nav/msgboard/" target="_blank" title="意见反馈">意见反馈</a></div></div></div></div><div class="footer-other"><div class="footer-copyright"><!--img(src='/img/ht_08.png')--><span class="copyright">&copy;&nbsp;2025 - 2026 By 广州威克斯软件科技有限公司</span><span class="framework-info"><span class="footer-separator">|<a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备案</a><span class="footer-separator">|</span></span><span>公司地址：广州市增城区广深大道 邮编：511340 </span><br>&nbsp;<br>
+<!--img(src='/img/ht_09.jpg')--></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"></div><script src="/js/iplink.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

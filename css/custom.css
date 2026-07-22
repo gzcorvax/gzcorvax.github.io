@@ -1,0 +1,11 @@
+/* 为电脑端顶部导航栏设置背景图 */
+#nav {
+    background: url("/img/nav.jpg") no-repeat center center !important;
+    background-size: cover !important;
+}
+
+/* 为手机端展开的菜单设置背景图（可选） */
+.menus_items {
+    background: url("/img/menu.jpg") no-repeat center center !important;
+    background-size: cover !important;
+}
